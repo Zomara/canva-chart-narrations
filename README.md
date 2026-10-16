@@ -79,8 +79,10 @@ None. All 8 passages generated audio and returned a valid duration, so no passag
 
 The script records a separate reason for each passage it skips. It skips a passage when the text is empty, when audio generation or the duration read fails, or when the MP3 has zero duration. Each reason is printed under `Skipped:` in the terminal output.
 
-## Stage 2
+## Pipeline spec
 
-## Stage 3
+## Three-slide run log
 
-## Stage 4
+## Review notes
+
+## App results
