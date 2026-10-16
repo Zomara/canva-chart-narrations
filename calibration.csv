@@ -1,0 +1,9 @@
+id,words,chars,seconds,words_per_sec,file
+p01,25,157,8.976,2.785,audio/p01.mp3
+p02,59,329,21.48,2.747,audio/p02.mp3
+p03,22,129,9.6,2.292,audio/p03.mp3
+p04,80,460,29.76,2.688,audio/p04.mp3
+p05,31,210,13.488,2.298,audio/p05.mp3
+p06,71,385,27.768,2.557,audio/p06.mp3
+p07,47,282,17.952,2.618,audio/p07.mp3
+p08,89,482,31.032,2.868,audio/p08.mp3
