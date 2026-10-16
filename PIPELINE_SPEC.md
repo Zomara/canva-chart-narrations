@@ -46,8 +46,34 @@ The app retries when the gap is more than 3.0 seconds in either direction. It st
 |---|---|---|
 | 1 | edge-tts rate nudge | The script stays the same. The rate moves exactly **10 points** from `+0%`: gap over +3.0 s → `+10%` (faster); gap under −3.0 s → `-10%` (slower). The app makes the MP3 again. |
 | 2 | edge-tts rate nudge | The script stays the same. The rate moves exactly **10 more points** in the direction the new gap points. This gives `+20%`, `-20%` or back to `+0%`. The app makes the MP3 again. |
-| 3 | Model rewrite | The rate resets to `+0%`, because the 2.65 rate was measured at `+0%`. The app sends the script with the rewrite prompt below. New target words = current word count − round(gap × 2.65). Example: an 80-word script that measured 35.0 s against a 30 s target has a gap of +5.0, so the new target is 80 − 13 = **67 words**. |
-| 4 | Model rewrite | Same as retry 3, using the gap from retry 3. |
+| 3 | Model rewrite | The rate resets to `+0%`. The app sizes the rewrite from the **first attempt**, the latest MP3 measured at `+0%`, using the rewrite formula below. It never uses the gaps from retries 1 and 2, because a sped-up or slowed-down MP3 hides the script's real length. The app sends the script with the rewrite prompt below. |
+| 4 | Model rewrite | Rate stays `+0%`. Same as retry 3, but sized from **retry 3**, now the latest MP3 measured at `+0%`. |
+
+### Rewrite formula
+
+```
+new target words = round(script words × target seconds ÷ measured seconds)
+```
+
+- **script words** = the number of words in the script that was actually spoken in the latest `+0%` MP3. This is the model's real output, counted by the app, not the number it was asked for.
+- **measured seconds** = that MP3's length, measured with mutagen.
+- Rounding: nearest whole word, exact halves round up.
+
+Why it does not use 2.65: a slide misses its target because its script does not speak at 2.65 words per second (numbers, long words and punctuation change the pace). The formula uses this slide's own measured pace instead: script words ÷ measured seconds. 2.65 still sets the first attempt (section 2).
+
+### Worked example: one slide through all five attempts
+
+Target 30 s → first attempt 80 words (section 2). This slide's script speaks slower than average and runs 40.0 s at `+0%`. The rewrite model returns a few more words than asked, as models often do.
+
+| Attempt | Rate | Script words | Measured | Gap | Result | What the next step uses |
+|---|---|---|---|---|---|---|
+| First | `+0%` | 80 | 40.0 s | +10.0 | fail | Gap over +3.0 → speed up |
+| Retry 1 | `+10%` | 80 | 36.4 s | +6.4 | fail | Gap still over +3.0 → speed up again |
+| Retry 2 | `+20%` | 80 | 33.3 s | +3.3 | fail | Nudges used up → rewrite, sized from the **first attempt** (80 words, 40.0 s at `+0%`), not from this +3.3 |
+| Retry 3 | `+0%` | asked round(80 × 30 ÷ 40.0) = 60, model returned **68** | 34.0 s | +4.0 | fail | Rewrite, sized from **retry 3** (68 words, 34.0 s at `+0%`) |
+| Retry 4 | `+0%` | asked round(68 × 30 ÷ 34.0) = 60, model returned **61** | 30.5 s | +0.5 | **pass** | Download button appears |
+
+If retry 3 had used the +3.3 gap from retry 2, the rewrite would have asked for about 71 words (35.5 s) and missed by more.
 
 Rewrite prompt (verbatim):
 
