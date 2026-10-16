@@ -21,6 +21,8 @@ Return only the script text, with nothing before or after it.
 
 Only one part ever changes: the number on line 4 ("80"). The app sets it to the target words from section 2. For example, a 10-second target sends "Write about 27 words in total." Every other word stays exactly as shown.
 
+Each test slide also has a `key_visual_point`: the one chart fact the narration must state. The app never sends that value, or any instruction about it, to the narration model. It is used only for the coverage check in section 4.
+
 ## 2. Word count formula
 
 | Item | Value |
@@ -73,7 +75,19 @@ Script: {script}
 | Not allowed | Estimating the length from the word count or from the target words |
 | Failed runs | Every failed run is logged and shown in the results table. A failed run is never dropped, hidden or quietly re-run past the retry limit. |
 
-The results table has these columns: `slide_id`, `target_seconds`, `target_words`, `final_words`, `measured_seconds`, `gap_seconds`, `retries_used`, `timing_verdict`.
+### Coverage rule
+
+| Rule | Value |
+|---|---|
+| When it is judged | Once, after the final attempt (pass or fail on timing). It is a separate, text-only check and never part of the narration prompt. |
+| Inputs | The final script and the slide's `key_visual_point`. The slide image is not used. |
+| Evidence | The check must quote the exact sentence from the script that states the key point. No quote means FAIL. |
+| Coverage pass | All three match: **fact** (same subject and measure), **direction** (same up / down / flat / bigger-than), and **numbers** (every number in `key_visual_point` appears with the same value). The format may differ ("$48" = "forty-eight dollars"). Rounding to a different value fails. |
+| Pass example | Key point "Sales doubled after March". Script: "Sales doubled once March began." → PASS |
+| Fail examples | "Sales changed over the year" (no direction or amount) → FAIL. "Sales rose about 50% after March" (wrong number) → FAIL. |
+| On coverage FAIL | No retry: the narration model is never told the key point. The row is marked `coverage_verdict = FAIL` and the run is still logged and shown. |
+
+The results table has these columns: `slide_id`, `target_seconds`, `target_words`, `final_words`, `measured_seconds`, `gap_seconds`, `retries_used`, `timing_verdict`, `coverage_verdict`, `coverage_quote`.
 
 ## 5. Download button rule
 
@@ -83,3 +97,4 @@ The results table has these columns: `slide_id`, `target_seconds`, `target_words
 | Before a timing pass | The audio player can play the current attempt. The download button stays hidden. |
 | After a timing pass | The app shows the download button for that exact MP3, with the measured length and the target side by side |
 | Retry limit reached without a pass | The run is marked failed. The download button never appears. The failure message from section 3 is shown. |
+| Coverage FAIL with a timing pass | The download button still appears. The results table marks the row `coverage_verdict = FAIL`. |
