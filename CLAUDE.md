@@ -1,24 +1,26 @@
 # Canva Chart Narrations
 
-Zero University mock scenario: build a feature that generates narrations explaining the charts on slides, set in a fictional Canva context. No real Canva integration.
+A mock scenario set in a fictional Canva context. The end goal is a Streamlit app: upload slides, a vision model reads the text and charts, writes a narration script of a target length, and edge-tts turns it into an MP3. There is no real Canva integration.
 
-## Brief (paste stage info here)
+## Files
 
-TODO: Paste the Zero University stage briefs.
+| File | Purpose |
+|---|---|
+| `calibrate.py` | Generates one MP3 per passage and reads each file's real duration with mutagen |
+| `calibration.csv` | Per-passage words, characters, seconds and words/s |
+| `audio/` | The calibration MP3s |
+| `PIPELINE_SPEC.md` | The rules the app follows: prompt, length formula, retries, pass/fail, download button |
+| `Magic Studio Slide Narration Pipeline Spec.md` | Example spec from another project, used as a style reference |
 
-## Deliverable
+## Fixed numbers (from calibration)
 
-- A public GitHub repo with working code and a README.
-- TODO: Confirm the exact per-stage deliverables from the brief.
+- Voice `en-US-AriaNeural`, rate `+0%`
+- 2.65 words/s (424 words / 160.06 s, 8 passages); the per-passage range is 2.29–2.87
+- Timing tolerance ±3.0 s, measured with mutagen
 
-## Constraints
+## Rules
 
-- Mock scenario: do not use the real Canva API or account.
-- Time box: ~25 minutes for the first pass (started 2026-10-16).
-
-## Status
-
-- [ ] Paste stage briefs
-- [ ] Decide stack
-- [ ] Create public GitHub repo
-- [ ] Build stage 1
+- `PIPELINE_SPEC.md` is the plan file. Code must follow it, or the spec gets updated first.
+- Do not name a model provider unless the brief specifies one; read the model id from `.env`.
+- Never send `key_visual_point` to the narration model.
+- Never commit `.env` or API keys.
