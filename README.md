@@ -81,6 +81,8 @@ The script records a separate reason for each passage it skips. It skips a passa
 
 ## Pipeline spec
 
+The rules the app follows are in [PIPELINE_SPEC.md](PIPELINE_SPEC.md): the vision prompt, the word count formula, the retry order and limit, the pass/fail rules, and the download button rule.
+
 ## Three-slide run log
 
 ## Review notes
